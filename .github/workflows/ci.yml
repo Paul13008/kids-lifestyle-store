@@ -10,20 +10,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # 1) Récupérer le code
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 2) Installer Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
+      # 3) Installer pnpm (action officielle)
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 10
           run_install: false
 
+      # 4) Sanity check (diagnostic utile si ça casse)
       - name: Tooling versions
         run: |
           echo "PATH=$PATH"
@@ -31,6 +35,7 @@ jobs:
           pnpm --version
           which pnpm
 
+      # 5) Cache pnpm (plus rapide)
       - name: Setup pnpm cache
         uses: actions/cache@v4
         with:
@@ -39,13 +44,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpmstore-
 
+      # 6) Installer les deps
       - name: Install dependencies
         run: pnpm install
 
+      # 7) Lint & Typecheck (best effort)
       - name: Lint & Typecheck
         run: |
           pnpm lint || true
           pnpm run typecheck || true
 
+      # 8) Build Next.js (prod)
       - name: Build
         run: pnpm build
