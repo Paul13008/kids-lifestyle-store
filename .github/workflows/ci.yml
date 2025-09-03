@@ -6,39 +6,46 @@ on:
   pull_request:
     branches: [ "main" ]
 
-permissions:
-  contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      # 1) Récupérer le code du dépôt
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2) Installer Node 22 et activer le cache pnpm
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
 
-      # 3) Activer pnpm via Corepack
-      - name: Enable corepack (pnpm)
-        run: corepack enable
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+          run_install: false
 
-      # 4) Installer les dépendances
+      - name: Tooling versions
+        run: |
+          echo "PATH=$PATH"
+          node -v
+          pnpm --version
+          which pnpm
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpmstore-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpmstore-
+
       - name: Install dependencies
         run: pnpm install
 
-      # 5) Lint & typecheck (best effort : ne casse pas si absent)
       - name: Lint & Typecheck
         run: |
           pnpm lint || true
           pnpm run typecheck || true
 
-      # 6) Build Next.js (prod)
       - name: Build
         run: pnpm build
