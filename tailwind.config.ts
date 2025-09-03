@@ -7,8 +7,6 @@ export default {
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './styles/**/*.{css}',
   ],
-  theme: {
-    extend: {},
-  },
+  theme: { extend: {} },
   plugins: [],
 } satisfies Config;
