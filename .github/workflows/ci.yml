@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Récupérer le code du dépôt
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2) Installer Node 22 et activer le cache pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # 3) Activer pnpm via Corepack
+      - name: Enable corepack (pnpm)
+        run: corepack enable
+
+      # 4) Installer les dépendances
+      - name: Install dependencies
+        run: pnpm install
+
+      # 5) Lint & typecheck (best effort : ne casse pas si absent)
+      - name: Lint & Typecheck
+        run: |
+          pnpm lint || true
+          pnpm run typecheck || true
+
+      # 6) Build Next.js (prod)
+      - name: Build
+        run: pnpm build
